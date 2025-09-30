@@ -126,22 +126,16 @@
                     <p class="text-sm text-red-500 dark:text-red-400 mt-2">※ 아래 버튼을 누르면 새 탭에서 Google Form이 열립니다. 내용을 확인 후 직접 제출해주세요.</p>
                 </div>
                 
-                <button id="copyAndSendButton" class="w-full px-6 py-3 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition duration-300 mt-2">
+                <button id="submitToGoogleFormButton" class="w-full px-6 py-3 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition duration-300 mt-2">
                     <i class="fa-solid fa-external-link-alt mr-2"></i> Google Form으로 결과 제출하기 (필수)
                 </button>
                 
                 <button id="reviewButton" class="w-full px-6 py-3 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition duration-300 mt-4">
                    <i class="fa-solid fa-file-circle-check mr-2"></i> 답안 상세 검토
                 </button>
-                <button id="restartButton" class="w-full px-6 py-3 bg-gray-300 text-gray-800 font-bold rounded-lg hover:bg-gray-400 transition duration-300 mt-2">
-                    <i class="fa-solid fa-arrow-rotate-left mr-2"></i> 다시 응시하기
-                </button>
             </div>
         </div>
         
-        <!-- Data Collection Iframe (Hidden from user and no longer used for submission) -->
-        <iframe id="dataSenderFrame" style="display:none;"></iframe>
-
         <!-- Scroll to Top Button (New Feature) -->
         <button id="scrollToTopBtn" class="hidden fixed bottom-5 right-5 bg-blue-600 text-white w-12 h-12 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-110 transition duration-300">
             <i class="fa-solid fa-arrow-up"></i>
@@ -156,7 +150,7 @@
         const SHUFFLE_QUESTIONS = true; // Set to true to randomize question order
         
         // ★★★ [IMPORTANT] Paste the 'viewform' URL of the admin's Google Form here! ★★★
-        const ADMIN_COLLECTION_VIEW_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfAXtB6-6b0jcsIdPWZuPakxtYZFbSBE7yDCOXH77F-Dojlog/viewform"; 
+        const ADMIN_COLLECTION_VIEW_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfAXtB6-6b0jcsIdPWZuPakxtYZFbSBE7yDCOXHH77F-Dojlog/viewform"; 
         
         // Google Forms Field Entry IDs
         const FORM_ENTRY_IDS = {
@@ -169,5 +163,383 @@
         
         // AIPD Qualification Test Question Data
         const questions = [
-            { q: "프롬프트(Prompt)의 가장 올바른 정의는 무엇인가요?", options: ["AI가 제시하는 결과물", "사용자가 AI에게 전달하는 지시문", "AI가 학습하는 데이터셋", "결과를 평가하는 피드백 문장"], a
+            { q: "프롬프트(Prompt)의 가장 올바른 정의는 무엇인가요?", options: ["AI가 제시하는 결과물", "사용자가 AI에게 전달하는 지시문", "AI가 학습하는 데이터셋", "결과를 평가하는 피드백 문장"], a: 1 },
+            { q: "다음 중 좋은 프롬프트의 특징이 아닌 것은?", options: ["명확하고 구체적이다", "목표와 맥락을 포함한다", "여러 가지 요청을 한 문장에 혼합한다", "단계별로 지시한다"], a: 2 },
+            { q: "“당신은 인사담당자입니다. 신입사원 면접질문 5가지를 작성해주세요.” 이 문장은 어떤 유형의 프롬프트에 해당하나요?", options: ["역할 지정형", "예시 제공형", "비교 분석형", "질문 유도형"], a: 0 },
+            { q: "다음 중 프롬프트 작성 3원칙에 해당하는 것은?", options: ["단순성, 중복성, 폐쇄성", "명확성, 구체성, 맥락성", "다양성, 창의성, 자율성", "간결성, 즉흥성, 추상성"], a: 1 },
+            { q: "AI가 사용자의 의도를 정확히 이해하도록 돕는 요소는?", options: ["감정적 표현", "구체적인 맥락(Context)", "긴 문장", "추상적 개념"], a: 1 },
+            { q: "프롬프트 엔지니어링(Prompt Engineering)의 핵심 목표는?", options: ["AI가 스스로 학습하도록 하는 것", "AI의 성능을 평가하는 것", "원하는 결과를 얻기 위한 입력 설계", "데이터를 수집하는 과정"], a: 2 },
+            { q: "다음 중 프롬프트 작성 시 피해야 할 행동은?", options: ["명확한 지시 제공", "단계별 절차 제시", "불필요한 정보 과다 포함", "원하는 형식 지정"], a: 2 },
+            { q: "“3단계로 나누어 설명해주세요.”는 어떤 프롬프트 기법인가요?", options: ["단계적 사고 유도(Chain of Thought)", "예시 기반 학습(Few-shot)", "역할 부여(Role Prompting)", "출력 제어(Output Control)"], a: 0 },
+            { q: "AI에게 역할을 부여하는 이유로 적절한 것은?", options: ["대답을 길게 하기 위해서", "특정 시각과 전문성을 반영하기 위해서", "AI가 사용자에게 질문하게 하기 위해서", "결과를 무작위로 생성하기 위해서"], a: 1 },
+            { q: "다음 중 **출력 형식(format)**을 제시하는 프롬프트 예시는?", options: ["“10가지 이유를 설명해줘.”", "“표 형태로 정리해줘.”", "“한 문장으로 요약해줘.”", "“왜 그렇게 생각하는지 말해줘.”"], a: 1 },
+            { q: "프롬프트에서 역할(Role), 지시(Task), **출력 형식(Format)**을 포함하는 구조는?", options: ["RTF 구조", "AID 구조", "ABC 구조", "STF 구조"], a: 0 },
+            { q: "“당신은 마케팅 전문가입니다. 표로 SWOT 분석을 작성해주세요.” 이 프롬프트의 구성 요소는?", options: ["역할 + 출력 형식", "목표 + 감정 표현", "지시 + 데이터", "예시 + 질문"], a: 0 },
+            { q: "다음 중 좋은 프롬프트 작성 순서로 올바른 것은?", options: ["요청 → 배경 → 역할", "목표 → 맥락 → 요청", "예시 → 요청 → 결과", "요청 → 피드백 → 목표"], a: 1 },
+            { q: "“표로 정리해줘”와 같이 결과물을 특정 형식으로 요구하는 것은?", options: ["출력 제어", "맥락 제시", "역할 부여", "창의적 지시"], a: 0 },
+            { q: "프롬프트 작성 시 모호한 단어 사용을 피해야 하는 이유는?", options: ["AI가 문법 오류를 낸다", "AI가 사용자 의도를 정확히 해석하지 못한다", "AI가 학습 데이터를 삭제한다", "결과가 너무 간단해진다"], a: 1 },
+            { q: "프롬프트 작성 시 \"누구에게\", \"무엇을\", \"어떻게\"를 명확히 해야 하는 이유는?", options: ["시간 절약을 위해", "AI가 사용자의 목적을 정확히 이해하도록", "문장을 길게 만들기 위해", "출력 제한을 피하기 위해"], a: 1 },
+            { q: "AI가 오답을 제시했을 때 프롬프트 개선 방법으로 가장 적절한 것은?", options: ["AI의 답을 무시한다", "더 많은 질문을 던진다", "요청을 더 구체화하고 단계별로 나눈다", "AI를 재시작한다"], a: 2 },
+            { q: "워크프롬프트(Work Prompt)를 작성할 때 가장 먼저 고려해야 할 사항은 무엇인가요?", options: ["출력 형식을 정하는 것", "AI의 감정 상태를 지정하는 것", "작업 목적과 기대 결과를 명확히 정의하는 것", "프롬프트 길이를 줄이는 것"], a: 2 },
+            { q: "챗봇을 만들 때 프롬프트 설계에서 가장 중요한 요소는 무엇인가요?", options: ["챗봇의 이름", "답변의 길이", "사용자 질문 의도에 맞는 시나리오 흐름 설계", "AI의 감정 표현 정도"], a: 2 },
+            { q: "다음 중 프롬프트의 역할로 가장 적절한 것은?", options: ["AI가 출력한 답변을 평가한다", "AI의 사고 방향과 출력 형식을 안내한다", "AI의 데이터베이스를 업데이트한다", "사용자 대신 답변을 생성한다"], a: 1 }
+        ];
+
+        // --- DOM Elements ---
+        const dom = {
+            userInfo: document.getElementById('userInfo'),
+            nameInput: document.getElementById('nameInput'),
+            emailInput: document.getElementById('emailInput'),
+            startButton: document.getElementById('startButton'),
+            timerWrapper: document.getElementById('timerWrapper'),
+            timerDisplay: document.getElementById('timerDisplay'),
+            progressWrapper: document.getElementById('progressWrapper'),
+            progressBar: document.getElementById('progressBar'),
+            progressText: document.getElementById('progressText'),
+            quizContainer: document.getElementById('quizContainer'),
+            submitWrapper: document.getElementById('submitWrapper'),
+            submitButton: document.getElementById('submitButton'),
+            resultModal: document.getElementById('resultModal'),
+            resultModalContent: document.getElementById('resultModalContent'),
+            resultText: document.getElementById('resultText'),
+            modalName: document.getElementById('modalName'),
+            modalEmail: document.getElementById('modalEmail'),
+            modalTime: document.getElementById('modalTime'),
+            submitToGoogleFormButton: document.getElementById('submitToGoogleFormButton'),
+            reviewButton: document.getElementById('reviewButton'),
+            scrollToTopBtn: document.getElementById('scrollToTopBtn'),
+            themeToggle: document.getElementById('theme-toggle'),
+            themeToggleDarkIcon: document.getElementById('theme-toggle-dark-icon'),
+            themeToggleLightIcon: document.getElementById('theme-toggle-light-icon'),
+        };
+
+        // --- State Management ---
+        const state = {
+            timerInterval: null,
+            timeRemaining: QUIZ_DURATION_MINUTES * 60,
+            startTime: 0,
+            userAnswers: [],
+            finalScore: 0,
+            userName: '',
+            userEmail: '',
+            timeElapsed: '',
+            totalQuestions: questions.length,
+            shuffledQuestions: [],
+        };
+
+        // --- Functions ---
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            const name = dom.nameInput.value.trim();
+            const email = dom.emailInput.value.trim();
+            const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+            if (!name || !isEmailValid) {
+                showCustomMessage("응시자 정보 오류", "성명과 유효한 이메일을 먼저 정확히 입력해 주세요.");
+                return;
+            }
+
+            state.userName = name;
+            state.userEmail = email;
+            state.shuffledQuestions = SHUFFLE_QUESTIONS ? shuffleArray([...questions]) : [...questions];
+
+
+            dom.userInfo.classList.add('hidden');
+            dom.timerWrapper.classList.remove('hidden');
+            dom.progressWrapper.classList.remove('hidden');
+            dom.quizContainer.classList.remove('hidden');
+            dom.submitWrapper.classList.remove('hidden');
+
+            loadQuiz();
+            state.startTime = Date.now();
+            startTimer();
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const submitBtn = dom.submitButton;
+            const answeredQuestions = dom.quizContainer.querySelectorAll('input[type="radio"]:checked').length;
+            const progress = (answeredQuestions / state.totalQuestions) * 100;
+            
+            dom.progressBar.style.width = `${progress}%`;
+            dom.progressText.textContent = `${Math.round(progress)}% (${answeredQuestions}/${state.totalQuestions})`;
+
+            if (answeredQuestions === state.totalQuestions) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        function loadQuiz() {
+            dom.quizContainer.innerHTML = `
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">문제 풀이</h2>
+                <p class="text-base text-gray-600 dark:text-gray-400 mb-6">※ 각 문항의 보기 중 가장 알맞은 답을 선택하세요.</p>`;
+
+            state.shuffledQuestions.forEach((q, index) => {
+                const qNum = index + 1;
+                const questionBlock = document.createElement('div');
+                questionBlock.className = "mb-8 p-5 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800/50 shadow-sm transition duration-150 hover:shadow-md question-block";
+                questionBlock.dataset.questionId = questions.indexOf(q);
+
+                let optionsHtml = '';
+                q.options.forEach((option, optIndex) => {
+                    const optionId = `q${index}-opt${optIndex}`;
+                    optionsHtml += `
+                        <div class="relative">
+                            <input type="radio" id="${optionId}" name="q${index}" value="${optIndex}" class="hidden peer" required>
+                            <label for="${optionId}" class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg cursor-pointer transition duration-150 border-2 border-transparent peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-800/50">
+                                <span class="w-6 h-6 mr-3 text-lg font-bold flex items-center justify-center rounded-full border-2 border-gray-400 dark:border-gray-500 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-600 checkmark peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 dark:peer-checked:bg-blue-600 dark:peer-checked:border-blue-500 transition-all duration-200">${optIndex + 1}</span>
+                                <span class="text-gray-700 dark:text-gray-300">${option}</span>
+                            </label>
+                        </div>`;
+                });
+
+                questionBlock.innerHTML = `
+                    <p class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                        <span class="text-blue-600 mr-2">${qNum}.</span> ${q.q}
+                    </p>
+                    <div class="space-y-3">${optionsHtml}</div>
+                    <div class="review-feedback mt-3 text-sm font-semibold hidden"></div>
+                `;
+                dom.quizContainer.appendChild(questionBlock);
+            });
+            
+            dom.quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', updateProgress);
+            });
+            updateProgress();  
+        }
+
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            dom.timerDisplay.classList.add('animate-pulse');
+            state.timerInterval = setInterval(() => {
+                state.timeRemaining--;
+                dom.timerDisplay.textContent = formatTime(state.timeRemaining);
+
+                if (state.timeRemaining <= 60 && state.timeRemaining > 0) {
+                    dom.timerDisplay.classList.add('bg-red-100');
+                    dom.timerDisplay.classList.remove('bg-white');
+                }
+                
+                if (state.timeRemaining <= 0) {
+                    clearInterval(state.timerInterval);
+                    dom.timerDisplay.textContent = "시간 초과!";
+                    dom.timerDisplay.classList.remove('animate-pulse');
+                    submitQuiz(true); 
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(state.timerInterval);
+            dom.timerDisplay.classList.remove('animate-pulse');
+        }
+
+        function submitQuiz(timeExpired = false) {
+            stopTimer();
+
+            if (!timeExpired && dom.quizContainer.querySelectorAll('input[type="radio"]:checked').length !== state.totalQuestions) {
+                showCustomMessage("답안 미작성", "모든 문항에 답안을 선택해야 제출할 수 있습니다.");
+                startTimer();
+                return;
+            }
+
+            let score = 0;
+            const pointsPerQuestion = 100 / state.totalQuestions;
+            state.userAnswers = new Array(state.totalQuestions).fill(-1);
+            
+            state.shuffledQuestions.forEach((q, index) => {
+                const selected = dom.quizContainer.querySelector(`input[name="q${index}"]:checked`);
+                const userAnswer = selected ? parseInt(selected.value) : -1;
+                const originalIndex = questions.indexOf(q);
+                state.userAnswers[originalIndex] = userAnswer;
+
+                if (userAnswer === q.a) {
+                    score += pointsPerQuestion;
+                }
+            });
+
+            state.finalScore = Math.round(score * 100) / 100;
+            
+            const endTime = Date.now();
+            const totalSecondsElapsed = Math.floor((endTime - state.startTime) / 1000);
+            const elapsedMinutes = Math.floor(totalSecondsElapsed / 60);
+            const elapsedSeconds = totalSecondsElapsed % 60;
+            state.timeElapsed = `${elapsedMinutes}분 ${elapsedSeconds}초`;
+
+            showResultModal();
+        }
+
+        function showResultModal() {
+            dom.modalName.textContent = state.userName;
+            dom.modalEmail.textContent = state.userEmail;
+            dom.modalTime.textContent = state.timeElapsed;
+            dom.resultText.innerHTML = `획득 점수: <span class="text-4xl font-extrabold text-red-600 dark:text-red-400">${state.finalScore}</span>점 / 100점`;
+            
+            dom.resultModal.classList.remove('hidden');
+            dom.resultModalContent.classList.add('modal-enter-active');
+            dom.submitButton.disabled = true;
+        }
+        
+        function submitToGoogleForm() {
+            const correctCount = state.userAnswers.filter((a, i) => a === questions[i].a).length;
+            const isConfigured = ADMIN_COLLECTION_VIEW_FORM_URL && ADMIN_COLLECTION_VIEW_FORM_URL.startsWith("https") && FORM_ENTRY_IDS.NAME;
+            
+            if (isConfigured) {
+                const urlParams = new URLSearchParams();
+                urlParams.append(FORM_ENTRY_IDS.NAME, state.userName);
+                urlParams.append(FORM_ENTRY_IDS.EMAIL, state.userEmail);
+                urlParams.append(FORM_ENTRY_IDS.SCORE, state.finalScore);
+                urlParams.append(FORM_ENTRY_IDS.CORRECT_COUNT, correctCount);
+                urlParams.append(FORM_ENTRY_IDS.TIME_ELAPSED, state.timeElapsed);
+
+                const submissionUrl = ADMIN_COLLECTION_VIEW_FORM_URL + '?' + urlParams.toString();
+                
+                window.open(submissionUrl, '_blank');
+                showCustomMessage("데이터 제출", "새 탭에서 Google Form을 열었습니다. 내용을 확인하고 제출해주세요.", 4000);
+            } else {
+                showCustomMessage("관리자 설정 오류", "Forms URL 또는 ID 설정이 완료되지 않았습니다.", 4000);
+            }
+        }
+
+        function showReviewMode() {
+            dom.resultModal.classList.add('hidden');
+            const questionBlocks = dom.quizContainer.querySelectorAll('.question-block');
+
+            questionBlocks.forEach(block => {
+                const originalIndex = parseInt(block.dataset.questionId, 10);
+                const userAnswer = state.userAnswers[originalIndex];
+                const correctAnswer = questions[originalIndex].a;
+                const feedbackElement = block.querySelector('.review-feedback');
+
+                block.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
+                feedbackElement.classList.remove('hidden');
+
+                if (userAnswer === correctAnswer) {
+                    feedbackElement.innerHTML = `✅ <span class="text-green-600 dark:text-green-400">정답입니다.</span>`;
+                } else {
+                    const correctOptionText = questions[originalIndex].options[correctAnswer];
+                    feedbackElement.innerHTML = `❌ <span class="text-red-600 dark:text-red-400">오답입니다.</span> 정답: ${correctAnswer + 1}번 (${correctOptionText})`;
+                }
+
+                if (userAnswer !== -1 && userAnswer !== correctAnswer) {
+                    const selectedLabel = block.querySelector(`input[value="${userAnswer}"] + label`);
+                    if (selectedLabel) {
+                        selectedLabel.classList.remove('peer-checked:border-blue-500', 'peer-checked:bg-blue-50');
+                        selectedLabel.classList.add('border-red-500', 'bg-red-50', 'dark:bg-red-800/20', 'dark:border-red-600');
+                    }
+                }
+                
+                const correctLabel = block.querySelector(`input[value="${correctAnswer}"] + label`);
+                if (correctLabel) {
+                    correctLabel.classList.remove('peer-checked:border-blue-500', 'peer-checked:bg-blue-50');
+                    correctLabel.classList.add('border-green-500', 'bg-green-100', 'font-bold', 'dark:bg-green-800/30', 'dark:border-green-500');
+                }
+            });
+
+            dom.submitWrapper.classList.add('hidden');
+            dom.timerDisplay.textContent = "채점 완료";
+            dom.progressWrapper.classList.add('hidden');
+            showCustomMessage("검토 모드", "답안이 채점되었습니다. 아래에서 정답과 오답을 확인해 보세요.", 4000);
+            
+            // Show scroll to top button
+            window.addEventListener('scroll', handleScroll);
+            handleScroll(); // Check on init
+            
+            // Scroll to first question
+            questionBlocks[0]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function handleScroll() {
+            if (window.scrollY > 200) {
+                dom.scrollToTopBtn.classList.remove('hidden', 'opacity-0', 'scale-90');
+                dom.scrollToTopBtn.classList.add('opacity-100', 'scale-100');
+            } else {
+                dom.scrollToTopBtn.classList.add('opacity-0', 'scale-90');
+                setTimeout(() => dom.scrollToTopBtn.classList.add('hidden'), 300);
+            }
+        }
+        
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showCustomMessage(title, message, duration = 4000) {
+            const existingModal = document.getElementById('customMessageModal');
+            if (existingModal) existingModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'customMessageModal';
+            modal.className = "fixed inset-0 bg-gray-900 bg-opacity-75 z-[60] flex items-center justify-center p-4";
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-sm w-full p-6 modal-enter modal-enter-active">
+                    <h4 class="text-xl font-bold text-blue-600 dark:text-blue-400 mb-3 border-b dark:border-gray-600 pb-2">${title}</h4>
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                    <button id="customMessageOkBtn" class="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition">확인</button>
+                </div>`;
+            document.body.appendChild(modal);
+
+            const okButton = document.getElementById('customMessageOkBtn');
+            const closeModal = () => modal.remove();
+            okButton.addEventListener('click', closeModal);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (document.body.contains(modal)) modal.remove();
+                }, duration);
+            }
+        }
+
+        // --- Night Mode Logic ---
+        function setupThemeToggle() {
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                dom.themeToggleLightIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                dom.themeToggleDarkIcon.classList.remove('hidden');
+            }
+
+            dom.themeToggle.addEventListener('click', function() {
+                dom.themeToggleDarkIcon.classList.toggle('hidden');
+                dom.themeToggleLightIcon.classList.toggle('hidden');
+                
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('color-theme', isDark ? 'dark' : 'light');
+            });
+        }
+        
+        // --- Event Listeners ---
+        function bindEventListeners() {
+            dom.startButton.addEventListener('click', startQuiz);
+            dom.submitButton.addEventListener('click', () => submitQuiz(false));
+            dom.submitToGoogleFormButton.addEventListener('click', submitToGoogleForm);
+            dom.reviewButton.addEventListener('click', showReviewMode);
+            dom.scrollToTopBtn.addEventListener('click', scrollToTop);
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupThemeToggle();
+            bindEventListeners();
+        });
+    })();
+    </script>
+</body>
+</html>
 
